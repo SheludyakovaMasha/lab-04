@@ -1,284 +1,129 @@
-# lab-03
+
+
+Сейчас вам требуется настроить систему непрерывной интеграции для библиотек и приложений, с которыми вы работали в прошлый раз. Настройте сборочные процедуры на различных платформах:
 
 # Task 1
 
-Вам поручили перейти на систему автоматизированной сборки CMake. Исходные файлы находятся в директории `formatter_lib`. В этой директории находятся файлы для статической библиотеки `formatter`. Создайте `CMakeList.txt` в директории `formatter_lib`, с помощью которого можно будет собирать статическую библиотеку formatter
+Используйте GitHub Actions для сборки на операционной системе Linux с использованием компиляторов gcc и clang
+
+Clone the Remote repository from the previous LR to the current one
 
 ```
-$ echo "# lab-03" >> README.md
-$ git init
-$ git add README.md
-$ git commit -m "fork"
-$ git remote add origin https://github.com/ledibonibell/lab-03.git
-$ git push -u origin master
+$ git clone https://github.com/ledibonibell/lab-03 lab-04
+$ cd ~/lab-04
+$ git remote remove origin
+$ git remote add origin https://github.com/ledibonibell/lab-04.git
 ```
-![image](https://github.com/SheludyakovaMasha/lab-03/assets/113375463/1dd7d177-174a-49bf-9fa0-2aab2700b955)
+![Снимок экрана от 2023-03-19 11-45-56](https://user-images.githubusercontent.com/125737299/226168945-d269c627-e590-4d2b-97ca-58e4046cf4a5.png)
 
 
+And we make the folder `~/lab-04/.github/workflows`
 ```
-$ git checkout -b lab
-$ cat >> CMakeLists.txt << EOF
+$ mkdir .github
+$ cd ~/lab-04/.github
+$ mkdir workflows
+$ cd ~/lab-04/.github/workflows
+```
+![Снимок экрана от 2023-03-19 11-47-55](https://user-images.githubusercontent.com/125737299/226168959-1f395faa-d6c6-4e5d-8acb-de0c122ceaeb.png)
+
+```
+$ cat >> Linux.yml << EOF
 > EOF
-$ nano CMakeLists.txt
-```
-![image](https://github.com/SheludyakovaMasha/lab-03/assets/113375463/f3c91e16-12f0-45b8-ae2c-306871a0af2e)
-
-
-
-Содержимое файла CMakeLists.txt:
-
-```
-cmake_minimum_required(VERSION 3.4)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-project(formatter)
-
-add_library(formatter STATIC formatter.cpp)
-target_include_directories(formatter PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+$ nano Linux.yml
 ```
 
-- Команда cmake_minimum_required указывает подходящую минимальную версию Cmake
-- Команды set(CMAKE_CXX_STANDARD 11), set(CMAKE_CXX_STANDARD_REQUIRED ON) устанавливают значения стандартных переменных в Cmake(в данном случае CMAKE_CXX_STANDARD и CMAKE_CXX_STANDARD_REQUIRED)
-- Команда project(formatter) создает проект formatter, к которому можно подключать библиотеки, исполняемы файлы и т.д.
-- Команда add_library(formatter STATIC formatter.cpp) создает статическую библиотеку из указываемых файлов
-- Команда target_include_directories связывает библиотеку formatter и CMAKE_CURRENT_SOURCE_DIR
+Содержимое файла Linux.yml:
 
 ```
-$ git add CMakeLists.txt
-$ git commit -m "added CMakeLists.txt"
-$ git push origin lab
-$ git add formatter.h
-$ git commit -m "added formatter.h"
-$ git push origin lab
-$ git add formatter.cpp
-$ git commit -m "added formatter.cpp"
-$ git push origin lab
+name: CMake
+
+on:
+ push:
+  branches: [master]
+ pull_request:
+  branches: [master]
+
+jobs: 
+ build_Linux:
+
+  runs-on: ubuntu-latest
+
+  steps:
+  - uses: actions/checkout@v3
+
+  - name: Configure Solver
+    run: cmake ${{github.workspace}}/solver_application/ -B ${{github.workspace}}/solver_application/build
+
+  - name: Build Solver
+    run: cmake --build ${{github.workspace}}/solver_application/build
+
+  - name: Configure HelloWorld
+    run: cmake ${{github.workspace}}/hello_world_application/ -B ${{github.workspace}}/hello_world_application/build
+
+  - name: Build HelloWorld
+    run: cmake --build ${{github.workspace}}/hello_world_application/buildс
 ```
 
-Проверяем работоспособность CMake:
 ```
-$ cmake -H. -B_build
-$ cmake --build _build
-
+$ git add Linux.yml
+$ git commit -m "Linux.yml - 1"
+$ git push origin master
 ```
-![image](https://github.com/SheludyakovaMasha/lab-03/assets/113375463/417e9896-3d07-4068-b266-adf02ced6e66)
+![Снимок экрана от 2023-03-19 12-53-41](https://user-images.githubusercontent.com/125737299/226168997-4253e284-d152-4166-a08b-50fb8544141f.png)
 
 
+The script was executed
 
 # Task 2
 
-У компании "Formatter Inc." есть перспективная библиотека, которая является расширением предыдущей библиотеки. Т.к. вы уже овладели навыком созданием `CMakeList.txt` для статической библиотеки formatter, ваш руководитель поручает заняться созданием `CMakeList.txt` для библиотеки formatter_ex, которая в свою очередь использует библиотеку formatter
+Используйте GitHub Actions для сборки на операционной системе Windows
 
 ```
-$ cat >> CMakeLists.txt << EOF
+$ cat >> Windows.yml << EOF
 > EOF
-$ nano CMakeLists.txt
-```
-![image](https://github.com/SheludyakovaMasha/lab-03/assets/113375463/0b69bfa2-edcf-4ae8-87a3-c5ce7cd23389)
-
-
-Содержимое файла CMakeLists.txt:
-
-```
-cmake_minimum_required(VERSION 3.4)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-project(formatter_ex)
-
-add_library(formatter_ex STATIC formatter_ex.cpp)
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../formatter_lib ${CMAKE_CURRENT_BINARY_DIR}/formatter)
-target_include_directories(formatter_ex PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(formatter_ex formatter)
-```
-
-- Команда add_subdirectory(../formatter_lib formatter) включает в сборку директорию с библиотекой formatter
-- Команда target_link_libraries(formatter_ex formatter) связывает библиотеку formatter с formatter_ex
-- Остальные команды аналогичны первому заданию
-
-```
-$ git add CMakeLists.txt
-$ git commit -m "added CMakeLists.txt"
-$ git push origin lab
-$ git add formatter_ex.h
-$ git commit -m "added formatter_ex.h"
-$ git push origin lab
-$ git add formatter_ex.cpp
-$ git commit -m "added formatter_ex.cpp"
-$ git push origin lab
-```
-
-Проверяем работоспособность CMake:
-```
-$ cmake -H. -B_build
-$ cmake --build _build
-```
-
-![image](https://github.com/SheludyakovaMasha/lab-03/assets/113375463/d24f1006-8a20-4f06-8b9e-fea82ad7b01c)
-
-
-# Task 3
-Конечно же ваша компания предоставляет примеры использования своих библиотек. Чтобы продемонстрировать как работать с библиотекой `formatter_ex`, вам необходимо создать два `CMakeList.txt` для двух простых приложений:
-
-- `hello_world`, которое использует библиотеку `formatter_ex`;
-- `solver`, приложение которое испольует статические библиотеки `formatter_ex` и `solver_lib`
-
-Удачной стажировки!
-
-### solver.cpp
-
-```
-$ cat >> CMakeLists.txt << EOF
-> EOF
-$ nano CMakeLists.txt
-```
-![image](https://github.com/SheludyakovaMasha/lab-03/assets/113375463/37057a63-2392-424b-a83b-bca53d121c80)
-
-
-Содержимое файла CMakeLists.txt:
-
-```
-cmake_minimum_required(VERSION 3.4)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-project(solver_lib)
-
-add_library(solver_lib STATIC solver.cpp)
-target_include_directories(solver_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-```
-
-- Команды аналогичны заданию 2 и 3
-
-```
-$ git add CMakeLists.txt
-$ git commit -m "added CMakeLists.txt"
-$ git push origin lab
-$ git add solver.h
-$ git commit -m "added solver.h"
-$ git push origin lab
-$ git add solver.cpp
-$ git commit -m "added solver.cpp"
-$ git push origin lab
-```
-
-Проверяем работоспособность CMake:
-```
-$ cmake -H. -B_build
-$ cmake --build _build
+$ nano Windows.yml
 ```
 
 
-
-### solver_example
-
-```
-$ cat >> CMakeLists.txt << EOF
-> EOF
-$ nano CMakeLists.txt
-```
-
-
-Содержимое файла CMakeLists.txt:
+Содержимое файла Windows.yml:
 
 ```
-cmake_minimum_required(VERSION 3.4)
+name: CMake
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+on:
+ push:
+  branches: [master]
+ pull_request:
+  branches: [master]
 
-project(solver_example)
+jobs: 
+ build_Windows:
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../solver_lib ${CMAKE_CURRENT_BINARY_DIR}/solver_lib)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../formatter_ex_lib ${CMAKE_CURRENT_BINARY_DIR}/formatter_ex)
+  runs-on: windows-latest
 
-add_executable(example equation.cpp)
+  steps:
+  - uses: actions/checkout@v3
 
-target_link_libraries(example solver_lib formatter_ex)
+  - name: Configure Solver
+    run: cmake ${{github.workspace}}/solver_application/ -B ${{github.workspace}}/solver_application/build
+
+  - name: Build Solver
+    run: cmake --build ${{github.workspace}}/solver_application/build
+
+  - name: Configure HelloWorld
+    run: cmake ${{github.workspace}}/hello_world_application/ -B ${{github.workspace}}/hello_world_application/build
+
+  - name: Build HelloWorld
+    run: cmake --build ${{github.workspace}}/hello_world_application/build
 ```
 
-- Команды аналогичны заданию 2 и 3
-
 ```
-$ git add CMakeLists.txt
-$ git commit -m "added CMakeLists.txt"
-$ git push origin lab
-$ git add equation.cpp
-$ git commit -m "added equation.cpp"
-$ git push origin lab
+$ git add Windows.yml
+$ git commit -m "Windows.yml - 1"
+$ git push origin master
 ```
-
-Проверяем работоспособность CMake:
-```
-$ cmake -H. -B_build
-$ cmake --build _build
-```
+![Снимок экрана от 2023-03-19 13-06-35](https://user-images.githubusercontent.com/125737299/226169021-d6f8e74d-6d17-4cfd-b0c5-2665d3b60524.png)
 
 
-
-Демонстрируем исполнение программы:
-```
-$ cmake --build _build --target example
-$ ./_build/example
-```
-
-### hello_world.cpp
-
-```
-$ git checkout -b lab
-$ cat >> CMakeLists.txt << EOF
-> EOF
-$ nano CMakeLists.txt
-```
-
-
-Содержимое файла CMakeLists.txt:
-
-```
-cmake_minimum_required(VERSION 3.4)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-project(hello_world_example)
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../formatter_ex_lib ${CMAKE_CURRENT_BINARY_DIR}/formatter_ex)
-add_executable(example hello_world.cpp)
-
-target_link_libraries(example formatter_ex)
-```
-
-- Команды аналогичны заданию 2 и 3
-
-```
-$ git add CMakeLists.txt
-$ git commit -m "added CMakeLists.txt"
-$ git push origin lab
-$ git add hello_world.cpp
-$ git commit -m "added hello_world.cpp"
-$ git push origin lab
-```
-
-Проверяем работоспособность CMake:
-```
-$ cmake -H. -B_build
-$ cmake --build _build
-```
-
-
-Демонстрируем исполнение программы:
-```
-$ cmake --build _build --target example
-$ ./_build/example
-```
-
-## Required libraries
-```
-$ sudo apt install cmake - устанавливаем пакет cmake
-```
+The script was executed
+![image](https://github.com/SheludyakovaMasha/lab-04/assets/113375463/be57ef63-063e-40de-8b2e-a2ff0954b6ef)
